@@ -6,8 +6,15 @@
     <title>{{ site.title }}</title>
     <link rel="stylesheet" href="assets/css/styles.css" />
     <script type="text/javascript" src="assets/js/grid.js" defer></script>
+    <script type="text/javascript" src="assets/js/game.js" defer></script>
+    <script type="text/javascript" defer>
+        window.onload = function() {
+            const canvas = document.getElementById("canvas");
+            new GameOfLife(canvas).run();
+        };
+    </script>
 </head>
-<body onload="draw()">
+<body>
     <canvas id="canvas"></canvas>
 </body>
 </html>
