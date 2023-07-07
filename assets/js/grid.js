@@ -1,63 +1,60 @@
+// Render
 function draw() {
-	var canvas = document.getElementById("canvas");
+	const canvas = document.getElementById("canvas");
 	if (canvas.getContext) {
+		resize(canvas);
+
 		const context = canvas.getContext("2d");
-		context.fillStyle = "rgb(200, 200, 200)";
-		context.fillRect(0, 0, 800, 800);
+		drawBackground(canvas, context);
+		drawGrid(canvas, context)
 	}
 }
 
-function drawGrid() {
-    var cnv = document.getElementById("canvas");
-    
-    var gridOptions = {
-        majorLines: {
-            separation: 50,
-            color: '#FF0000'
-        }
-    };
 
-    drawGridLines(cnv, gridOptions.majorLines);
+// Render background
+function drawBackground(canvas, context) {
+	context.fillStyle = "rgb(200, 200, 200)";
+	context.fillRect(0, 0, canvas.width, canvas.height);
+}
+
+
+// Render grid
+function drawGrid(canvas, context) {
+    var width = canvas.width;
+    var height = canvas.height;
+
+    const cellSize = 16;
+    const columns = Math.floor(width / cellSize);
+    const rows = Math.floor(height / cellSize);
+
+    context.strokeStyle = "#dddddd";
+    context.strokeWidth = 2;
+    
+    context.beginPath();
+
+    var position = 0;
+    for (column = 1; column < columns; column++) {
+        position = (column * cellSize);
+        context.moveTo(position, 0);
+        context.lineTo(position, height);
+        context.stroke();
+    }
+
+    position = 0;
+    for (var row = 1; row < rows; row++) {
+        position = (row * cellSize);
+        context.moveTo(0, position);
+        context.lineTo(width, position);
+        context.stroke();
+    }
+
+    context.closePath();
 
     return;
 }
 
-function drawGridLines(cnv, lineOptions) {
-    var iWidth = cnv.width;
-    var iHeight = cnv.height;
-
-    var ctx = cnv.getContext('2d');
-
-    ctx.strokeStyle = lineOptions.color;
-    ctx.strokeWidth = 1;
-    
-    ctx.beginPath();
-
-    var iCount = null;
-    var i = null;
-    var x = null;
-    var y = null;
-
-    iCount = Math.floor(iWidth / lineOptions.separation);
-
-    for (i = 1; i <= iCount; i++) {
-        x = (i * lineOptions.separation);
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, iHeight);
-        ctx.stroke();
-    }
-
-
-    iCount = Math.floor(iHeight / lineOptions.separation);
-
-    for (i = 1; i <= iCount; i++) {
-        y = (i * lineOptions.separation);
-        ctx.moveTo(0, y);
-        ctx.lineTo(iWidth, y);
-        ctx.stroke();
-    }
-
-    ctx.closePath();
-
-    return;
+// Resizes the given canvas based on its rendered CSS style
+function resize(canvas) {
+	canvas.width = canvas.offsetWidth;
+	canvas.height = canvas.offsetHeight;
 }
