@@ -14,20 +14,35 @@
  * limitations under the License.
  */
 
+/**
+ * Core game engine and functions.
+ */
 class GameOfLife {
 	stopMain;
 	count = 0;
 	canvas;
 
+	/**
+	 * Instantiates this game with the given canvas.
+	 * @param canvas HTML5 canvas the game will play on.
+	 */
 	constructor(canvas) {
 		this.canvas = canvas;
 	}
 
+	/**
+	 * Render step of the game loop.
+	 */
 	render() {
 		const grid = new Grid();
 		grid.draw(this.canvas);
 	}
 
+	/**
+	 * Main game loop.
+	 * @param tFrame Current loop timestamp.
+	 */
+	// TODO Rename this method
 	run(tFrame) {
 		if (this.count === 0) {
 			this.stopMain = window.requestAnimationFrame(() => this.run());
@@ -37,6 +52,10 @@ class GameOfLife {
 		this.count++;
 	}
 
+	/**
+	 * Update step of the game loop.
+	 * @param tFrame Current loop timestamp.
+	 */
 	update(tFrame) {
 	}
 }

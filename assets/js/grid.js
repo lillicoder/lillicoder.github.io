@@ -14,8 +14,15 @@
  * limitations under the License.
  */
 
+/**
+ * Draws a 2D grid on an HTML5 canvas.
+ */
 class Grid {
     
+    /**
+     * Draws a grid on the given canvas.
+     * @param canvas HTML5 canvas to draw on.
+     */
     draw(canvas) {
         if (canvas.getContext) {
             this.#resize(canvas);
@@ -26,11 +33,21 @@ class Grid {
         }
     }
 
+    /**
+     * Draws a background for the grid on the given canvas.
+     * @param canvas HTML5 canvas to draw on.
+     * @param context Canvas content to perform drawing operations with
+     */
     #drawBackground(canvas, context) {
         context.fillStyle = "rgb(200, 200, 200)";
         context.fillRect(0, 0, canvas.width, canvas.height);
     }
 
+    /**
+     * Draws grid lines on the given canvas.
+     * @param canvas HTML5 canvas to draw on.
+     * @param context Canvas content to perform drawing operations with.
+     */
     #drawGrid(canvas, context) {
         var width = canvas.width;
         var height = canvas.height;
@@ -65,6 +82,13 @@ class Grid {
         return;
     }
 
+    /**
+     * Resizes the given canvas so its width and height properties reflects its actual styled size.
+     * 
+     * HTML5 canvases will keep their default 300px by 150px measurements unless you manually reset
+     * the values after the DOM finishes laying out.
+     * @param canvas Canvas to resize.
+     */
     #resize(canvas) {
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
