@@ -21,12 +21,13 @@
     <meta charset="utf-8">
     <title>lillicoder</title>
     <link rel="stylesheet" href="assets/css/main.css" />
+    <script type="text/javascript" src="assets/js/board.js" defer></script>
     <script type="text/javascript" src="assets/js/grid.js" defer></script>
     <script type="text/javascript" src="assets/js/game.js" defer></script>
     <script type="text/javascript" defer>
         window.onload = function() {
             const canvas = document.getElementById("canvas");
-            new GameOfLife(canvas).run();
+            new GameOfLife(canvas).start();
         };
     </script>
 </head>

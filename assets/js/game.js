@@ -19,8 +19,9 @@
  */
 class GameOfLife {
 	stopMain;
-	count = 0;
 	canvas;
+	board;
+	grid;
 
 	/**
 	 * Instantiates this game with the given canvas.
@@ -28,28 +29,29 @@ class GameOfLife {
 	 */
 	constructor(canvas) {
 		this.canvas = canvas;
+		this.board = new Board();
+		this.grid = new Grid(); // TODO Unify grid and board state
+	}
+
+	start() {
+		this.loop(window.performance.now)
 	}
 
 	/**
 	 * Render step of the game loop.
 	 */
 	render() {
-		const grid = new Grid();
-		grid.draw(this.canvas);
+		this.grid.draw(this.canvas, this.board);
 	}
 
 	/**
 	 * Main game loop.
 	 * @param tFrame Current loop timestamp.
 	 */
-	// TODO Rename this method
-	run(tFrame) {
-		if (this.count === 0) {
-			this.stopMain = window.requestAnimationFrame(() => this.run());
-			this.update(tFrame);
-			this.render();	
-		}
-		this.count++;
+	loop(tFrame) {
+		this.stopMain = window.requestAnimationFrame(() => this.loop());
+		this.update(tFrame);
+		this.render();
 	}
 
 	/**
@@ -57,5 +59,11 @@ class GameOfLife {
 	 * @param tFrame Current loop timestamp.
 	 */
 	update(tFrame) {
+		let point = new Point(20, 20);
+		if (this.board.isAlive(point)) {
+			this.board.kill(point);
+		} else {
+			this.board.live(point);
+		}
 	}
 }
