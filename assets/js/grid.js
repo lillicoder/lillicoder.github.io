@@ -18,6 +18,14 @@
  * Draws a 2D grid on an HTML5 canvas.
  */
 class Grid {
+    // TODO Find a way to make these immutable to avoid side effects
+    config = {
+        strokeWidth: 2,
+        strokeColor: "#dddddd",
+        cellLength: 16,
+        aliveCellColor: "rgb(0, 0, 255)",
+        deadCellColor: "rgb(200, 200, 200)"
+    };
     
     /**
      * Draws a grid on the given canvas.
@@ -31,8 +39,6 @@ class Grid {
             const context = canvas.getContext("2d");
             this.#drawBackground(canvas, context);
             this.#drawGrid(canvas, context);
-
-            // Now I need to update cells
             this.#drawBoard(board, context);
         }
     }
@@ -43,12 +49,12 @@ class Grid {
      * @param context Canvas content to perform drawing operations with
      */
     #drawBackground(canvas, context) {
-        context.fillStyle = "rgb(200, 200, 200)";
+        context.fillStyle = this.config.deadCellColor;
         context.fillRect(0, 0, canvas.width, canvas.height);
     }
 
     #drawBoard(board, context) {
-        // TODO Introduce an interator to the board class to avoid this
+        // TODO Introduce an iterator to the board class to avoid this
         let length = board.length();
         for(let row = 0; row < length; row++) {
             for (let column = 0; column < length; column++) {
@@ -64,53 +70,61 @@ class Grid {
      * @param context Canvas content to perform drawing operations with.
      */
     #drawGrid(canvas, context) {
-        var width = canvas.width;
-        var height = canvas.height;
+        const width = canvas.width;
+        const height = canvas.height;
 
-        const cellSize = 16;
-        const columns = Math.floor(width / cellSize);
-        const rows = Math.floor(height / cellSize);
+        /**
+         * Span reflects ideal amount of columns/rows regardless of stroke.
+         * If we want to paint cells within stroke boundaries, we should
+         * find the length of a column accounting for the width of strokes.
+         */
+        const span = Math.floor(width / this.config.cellLength);
+        const totalStrokeWidth = span * this.config.strokeWidth;
+        const cellLength = Math.floor((width - totalStrokeWidth) / span);
 
-        context.strokeStyle = "#dddddd";
-        context.strokeWidth = 2;
-        
+        context.strokeStyle = this.config.strokeColor;
+        context.lineWidth = this.config.strokeWidth;
         context.beginPath();
 
-        var position = 0;
-        for (var column = 1; column < columns; column++) {
-            position = (column * cellSize);
-            context.moveTo(position, 0);
-            context.lineTo(position, height);
+        // Since the grid is square, we can setup all grid lines in a single loop pass
+        let columnPosition = 0;
+        let rowPosition = 0;
+        for (let pass = 0; pass <= span; pass++) {
+            // Column
+            context.moveTo(columnPosition, 0);
+            context.lineTo(columnPosition, height);
             context.stroke();
+            columnPosition += cellLength + this.config.strokeWidth;
+
+            // Row
+            context.moveTo(0, rowPosition);
+            context.lineTo(width, rowPosition);
+            context.stroke();
+            rowPosition += cellLength + this.config.strokeWidth;
         }
 
-        position = 0;
-        for (var row = 1; row < rows; row++) {
-            position = (row * cellSize);
-            context.moveTo(0, position);
-            context.lineTo(width, position);
-            context.stroke();
-        }
-
+        // Draw a grid border
+        context.strokeStyle = window.getComputedStyle(document.body).backgroundColor;
+        context.beginPath();
+        context.strokeRect(0, 0, width, height);
+        
         context.closePath();
-
-        return;
     }
 
     #paintCell(cell, context) {
-        // Each cell is 16px by `16`px
-        // TODO Refactor this to be dynamic
-        let length = 16;
-        let x = length * cell.point.x + 1; // TODO Use stroke size as variable
-        let y = length * cell.point.y + 1; // TODO Use stroke size as variable
+        // The strokes are split evenly between all sizes of a cell, so split the stroke width
+        let normalizedStrokeWidth = Math.floor(this.config.strokeWidth / 2);
+        let strokeWidth = Math.max(normalizedStrokeWidth, 1); // Always have at least 1 for the stroke width
+        let x = (this.config.cellLength * cell.point.x) + strokeWidth;
+        let y = (this.config.cellLength * cell.point.y) + strokeWidth;
 
-        if (cell.isAlive()) {
-            context.fillStyle = "rgb(0, 0, 0)";
-        } else {
-            context.fillStyle = "rgb(200, 200, 200)";
-        }
-
-        context.fillRect(x, y, length - 1, length - 1); // TODO Use stroke size as variable
+        context.fillStyle = cell.isAlive() ? this.config.aliveCellColor : this.config.deadCellColor;
+        context.fillRect(
+            x, 
+            y, 
+            this.config.cellLength - this.config.strokeWidth, 
+            this.config.cellLength - this.config.strokeWidth
+        );
     }
 
     /**

@@ -59,7 +59,7 @@ class GameOfLife {
 	 * @param tFrame Current loop timestamp.
 	 */
 	update(tFrame) {
-		let point = new Point(20, 20);
+		let point = new Point(1, 1);
 		if (this.board.isAlive(point)) {
 			this.board.kill(point);
 		} else {
