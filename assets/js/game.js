@@ -15,13 +15,42 @@
  */
 
 /**
+ * Tracks ongoing game loop state.
+ */
+class Tracker {
+	stopMain;
+	lastRender;
+	lastTick;
+	tickLength;
+
+	/**
+	 * Instantiates this tracker with the given tick length.
+	 * @param tickLength Tick length. Defaults to 1000.
+	 */
+	constructor(tickLength = 1000) {
+		this.stopMain = 0;
+		this.lastRender = 0;
+		this.lastTick = 0;
+		this.tickLength = tickLength;
+	}
+
+	/**
+	 * Gets the next tick based on the last tracked tick and current tick length.
+	 * @return Next tick.
+	 */
+	nextTick() {
+		return this.lastTick + this.tickLength;
+	}
+}
+
+/**
  * Core game engine and functions.
  */
 class GameOfLife {
-	stopMain;
 	canvas;
 	board;
 	grid;
+	tracker;
 
 	/**
 	 * Instantiates this game with the given canvas.
@@ -31,10 +60,11 @@ class GameOfLife {
 		this.canvas = canvas;
 		this.board = new Board();
 		this.grid = new Grid(); // TODO Unify grid and board state
+		this.tracker = new Tracker();
 	}
 
 	start() {
-		this.loop(window.performance.now)
+		this.loop(window.performance.now())
 	}
 
 	/**
@@ -49,16 +79,31 @@ class GameOfLife {
 	 * @param tFrame Current loop timestamp.
 	 */
 	loop(tFrame) {
-		this.stopMain = window.requestAnimationFrame(() => this.loop());
-		this.update(tFrame);
+		this.tracker.stopMain = window.requestAnimationFrame((tFrame) => this.loop(tFrame));
+		const nextTick = this.tracker.nextTick();
+
+		// Find tick delta since last loop
+		let ticks = 0;
+		if (tFrame > nextTick) {
+			const timeSince = tFrame - this.tracker.lastTick;
+			ticks = Math.floor(timeSince / this.tracker.tickLength);
+		}
+
+		// Catch up game state since last loop
+		for (let i = 0; i < ticks; i++) {
+			this.tracker.lastTick += this.tracker.tickLength;
+			this.update(this.tracker.lastTick);
+		}
+		
 		this.render();
+		this.tracker.lastRender = tFrame;
 	}
 
 	/**
 	 * Update step of the game loop.
-	 * @param tFrame Current loop timestamp.
+	 * @param tFrame Current loop tick.
 	 */
-	update(tFrame) {
+	update(tick) {
 		let point = new Point(1, 1);
 		if (this.board.isAlive(point)) {
 			this.board.kill(point);
