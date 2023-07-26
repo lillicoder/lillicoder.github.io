@@ -15,9 +15,9 @@
  */
 
 /**
- * Draws a 2D grid on an HTML5 canvas.
+ * Renders a game board on an HTML5 canvas.
  */
-class Grid {
+class Renderer {
     // TODO Find a way to make these immutable to avoid side effects
     config = {
         strokeWidth: 2,
@@ -28,51 +28,76 @@ class Grid {
     };
     
     /**
-     * Draws a grid on the given canvas.
-     * @param canvas HTML5 canvas to draw on.
+     * Renders the given board on the given canvas.
+     * @param canvas HTML5 canvas to render on.
+     * @param board Board to render.
      */
-    draw(canvas, board) {
+    render(canvas, board) {
         if (canvas.getContext) {
-            // Fix grid and draw
             this.#resize(canvas);
 
             const context = canvas.getContext("2d");
-            this.#drawBackground(canvas, context);
-            this.#drawGrid(canvas, context);
-            this.#drawBoard(board, context);
+            this.#renderBackground(context, canvas.width, canvas.height);
+            this.#renderGrid(context, canvas.width, canvas.height);
+            this.#renderBoard(context, board);
         }
     }
 
     /**
-     * Draws a background for the grid on the given canvas.
-     * @param canvas HTML5 canvas to draw on.
-     * @param context Canvas content to perform drawing operations with
+     * Renders a background of the given width and height with the given canvas context.
+     * @param context Canvas context.
+     * @param width Desired width.
+     * @param height Desired height.
      */
-    #drawBackground(canvas, context) {
+    #renderBackground(context, width, height) {
         context.fillStyle = this.config.deadCellColor;
-        context.fillRect(0, 0, canvas.width, canvas.height);
+        context.fillRect(0, 0, width, height);
     }
 
-    #drawBoard(board, context) {
+    /**
+     * Renders all cells of the given board.
+     * @param context Canvas context.
+     * @param board Board to render.
+     */
+    #renderBoard(context, board) {
         // TODO Introduce an iterator to the board class to avoid this
         let length = board.length();
         for(let row = 0; row < length; row++) {
             for (let column = 0; column < length; column++) {
                 let cell = board.cell(new Point(row, column));
-                this.#paintCell(cell, context);
+                this.#renderCell(context, cell);
             }
         }
     }
 
     /**
-     * Draws grid lines on the given canvas.
-     * @param canvas HTML5 canvas to draw on.
-     * @param context Canvas content to perform drawing operations with.
+     * Renders the given cell.
+     * @param context Canvas context.
+     * @param cell Cell to render.
      */
-    #drawGrid(canvas, context) {
-        const width = canvas.width;
-        const height = canvas.height;
+    #renderCell(context, cell) {
+        // The strokes are split evenly between all sizes of a cell, so split the stroke width
+        let normalizedStrokeWidth = Math.floor(this.config.strokeWidth / 2);
+        let strokeWidth = Math.max(normalizedStrokeWidth, 1); // Always have at least 1 for the stroke width
+        let x = (this.config.cellLength * cell.point.x) + strokeWidth;
+        let y = (this.config.cellLength * cell.point.y) + strokeWidth;
 
+        context.fillStyle = cell.isAlive() ? this.config.aliveCellColor : this.config.deadCellColor;
+        context.fillRect(
+            x, 
+            y, 
+            this.config.cellLength - this.config.strokeWidth, 
+            this.config.cellLength - this.config.strokeWidth
+        );
+    }
+
+    /**
+     * Renders a grid on the given canvas.
+     * @param context Canvas context.
+     * @param width Desired width.
+     * @param height Desired height.
+     */
+    #renderGrid(context, width, height) {
         /**
          * Span reflects ideal amount of columns/rows regardless of stroke.
          * If we want to paint cells within stroke boundaries, we should
@@ -103,28 +128,12 @@ class Grid {
             rowPosition += cellLength + this.config.strokeWidth;
         }
 
-        // Draw a grid border
+        // Render a border
         context.strokeStyle = window.getComputedStyle(document.body).backgroundColor;
         context.beginPath();
         context.strokeRect(0, 0, width, height);
         
         context.closePath();
-    }
-
-    #paintCell(cell, context) {
-        // The strokes are split evenly between all sizes of a cell, so split the stroke width
-        let normalizedStrokeWidth = Math.floor(this.config.strokeWidth / 2);
-        let strokeWidth = Math.max(normalizedStrokeWidth, 1); // Always have at least 1 for the stroke width
-        let x = (this.config.cellLength * cell.point.x) + strokeWidth;
-        let y = (this.config.cellLength * cell.point.y) + strokeWidth;
-
-        context.fillStyle = cell.isAlive() ? this.config.aliveCellColor : this.config.deadCellColor;
-        context.fillRect(
-            x, 
-            y, 
-            this.config.cellLength - this.config.strokeWidth, 
-            this.config.cellLength - this.config.strokeWidth
-        );
     }
 
     /**

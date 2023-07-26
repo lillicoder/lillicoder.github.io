@@ -49,7 +49,7 @@ class Tracker {
 class GameOfLife {
 	canvas;
 	board;
-	grid;
+	renderer;
 	tracker;
 
 	/**
@@ -59,7 +59,7 @@ class GameOfLife {
 	constructor(canvas) {
 		this.canvas = canvas;
 		this.board = new Board();
-		this.grid = new Grid(); // TODO Unify grid and board state
+		this.renderer = new Renderer();
 		this.tracker = new Tracker();
 	}
 
@@ -71,7 +71,7 @@ class GameOfLife {
 	 * Render step of the game loop.
 	 */
 	render() {
-		this.grid.draw(this.canvas, this.board);
+		this.renderer.render(this.canvas, this.board);
 	}
 
 	/**
