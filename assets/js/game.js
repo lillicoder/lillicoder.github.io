@@ -15,42 +15,18 @@
  */
 
 /**
- * Tracks ongoing game loop state.
- */
-class Tracker {
-	stopMain;
-	lastRender;
-	lastTick;
-	tickLength;
-
-	/**
-	 * Instantiates this tracker with the given tick length.
-	 * @param tickLength Tick length. Defaults to 1000.
-	 */
-	constructor(tickLength = 1000) {
-		this.stopMain = 0;
-		this.lastRender = 0;
-		this.lastTick = 0;
-		this.tickLength = tickLength;
-	}
-
-	/**
-	 * Gets the next tick based on the last tracked tick and current tick length.
-	 * @return Next tick.
-	 */
-	nextTick() {
-		return this.lastTick + this.tickLength;
-	}
-}
-
-/**
  * Core game engine and functions.
  */
 class GameOfLife {
 	canvas;
 	board;
 	renderer;
-	tracker;
+	tracker = {
+		stopMain: 0,
+		lastRender: 0,
+		lastTick: 0,
+		tickLength: 100
+	};
 
 	/**
 	 * Instantiates this game with the given canvas.
@@ -60,7 +36,6 @@ class GameOfLife {
 		this.canvas = canvas;
 		this.board = new Board();
 		this.renderer = new Renderer();
-		this.tracker = new Tracker();
 	}
 
 	start() {
@@ -80,7 +55,7 @@ class GameOfLife {
 	 */
 	loop(tFrame) {
 		this.tracker.stopMain = window.requestAnimationFrame((tFrame) => this.loop(tFrame));
-		const nextTick = this.tracker.nextTick();
+		const nextTick = this.tracker.lastTick + this.tracker.tickLength;
 
 		// Find tick delta since last loop
 		let ticks = 0;
