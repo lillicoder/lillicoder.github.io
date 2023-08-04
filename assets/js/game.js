@@ -67,7 +67,7 @@ class GameOfLife {
 		// Catch up game state since last loop
 		for (let i = 0; i < ticks; i++) {
 			this.tracker.lastTick += this.tracker.tickLength;
-			this.update(this.tracker.lastTick);
+			this.board = this.update(this.tracker.lastTick);
 		}
 		
 		this.render();
@@ -77,13 +77,22 @@ class GameOfLife {
 	/**
 	 * Update step of the game loop.
 	 * @param tFrame Current loop tick.
+	 * @return Updated board.
 	 */
 	update(tick) {
-		let point = new Point(1, 1);
-		if (this.board.isAlive(point)) {
-			this.board.kill(point);
-		} else {
-			this.board.live(point);
+		let nextBoard = this.board.clone();
+		for (const cell of this.board) {
+			let nextCell = nextBoard.cell(cell.point); // Mutate clone only
+			let count = this.board.countAliveNeighbors(cell); // Count from non-mutated original only
+			if (cell.isAlive() && (count < 2 || count > 3)) {
+				// Alive cells with too few or too many living neighbors should die
+				nextCell.die();
+			} else if (count == 3) {
+				// Dead cells with exactly 3 living neighbors should become alive
+				nextCell.live();
+			}
 		}
+
+		return nextBoard;
 	}
 }

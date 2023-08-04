@@ -30,6 +30,14 @@ class Point {
 		this.x = x;
 		this.y = y;
 	}
+
+	/**
+	 * Clones this point.
+	 * @return Clone.
+	 */
+	clone() {
+		return new Point(this.x, this.y);
+	}
 }
 
 /**
@@ -47,6 +55,14 @@ class Cell {
 	constructor(point = new Point(), alive = false) {
 		this.point = point;
 		this.alive = alive;
+	}
+
+	/**
+	 * Clones this cell.
+	 * @return Clone.
+	 */
+	clone() {
+		return new Cell(this.point.clone(), this.alive)
 	}
 
 	/**
@@ -75,16 +91,24 @@ class Cell {
 /**
  * Represents the state of the game board.
  */
-// TODO Is there a way to give this index-syntax as a custom class (like Kotlin can do)?
 class Board {
 	board;
 
+	*[Symbol.iterator]() {
+		for (const row of this.board) {
+			for (const cell of row) {
+				yield cell;
+			}
+		}
+	};
+
 	/**
 	 * Instantiates this board with the given size. Board will be square.
+	 * @param board Board to copy instead of creating a new one.
 	 * @param canvas HTML5 canvas the game will play on.
 	 */
-	constructor(span = 50) {
-		this.board = this.#makeBoard(span);
+	constructor(board = null, span = 50) {
+		this.board = board ?? this.#makeBoard(span);
 	}
 
 	/**
@@ -93,40 +117,73 @@ class Board {
 	 * @return Cell at the given point.
 	 */
 	cell(point) {
-		return this.board[point.x][point.y];
+		return this.board[point.x][point.y]; 
 	}
 
 	/**
-	 * Makes the cell at the given point alive.
-	 * @param point Point of the cell to make alive.
-	 */
-	live(point) {
-		this.board[point.x][point.y].live();
-	}
-
-	/**
-	 * Makes the cell at the given point dead.
-	 * @param point Point of the cell to kill.
-	 */
-	kill(point) {
-		this.board[point.x][point.y].die();
-	}
-
-	/**
-	 * Determines if the cell at the given point is alive.
-	 * @param point Point of the cell to check.
-	 * @return True if the cell is alive, false if it is dead.
-	 */
-	isAlive(point) {
-		return this.board[point.x][point.y].isAlive();
-	}
-
-	/**
-	 * Gets the length of a side of this board.
+	 * Gets the length of a side of this board. Boards are square.
 	 * @return Board length.
 	 */
 	length() {
 		return this.board.length;
+	}
+
+	/**
+	 * Clones this board.
+	 * @return Clone.
+	 */
+	clone() {
+		let span = this.length();
+		let board = Array.from(
+			{length: span}, (row, y) => Array.from(
+				{length: span}, (cell, x) => this.cell(new Point(x, y)).clone()
+			)
+		);
+		return new Board(board);
+	}
+
+	/**
+	 * Gets the count of living neighbors for the given cell.
+	 * @param cell Cell to count neighbors of.
+	 * @return Count of living neighbors.
+	 */
+	countAliveNeighbors(cell) {
+		let columnIndex = cell.point.x;
+		let rowIndex = cell.point.y;
+		let span = this.length();
+
+		// Populate cell neighbors, edge cells wrap to other side
+		let leftColumnIndex = columnIndex - 1;
+		if (leftColumnIndex < 0) {
+			leftColumnIndex = span - 1;
+		}
+
+		let rightColumnIndex = columnIndex + 1;
+		if (rightColumnIndex >= span) {
+			rightColumnIndex = 0;
+		}
+
+		let topRowIndex = rowIndex - 1;
+		if (topRowIndex < 0) {
+			topRowIndex = span - 1;
+		}
+
+		let bottomRowIndex = rowIndex + 1;
+		if (bottomRowIndex >= span) {
+			bottomRowIndex = 0;
+		}
+
+		let neighbors = [
+			this.board[topRowIndex][leftColumnIndex], // top left
+			this.board[topRowIndex][columnIndex], // top middle
+			this.board[topRowIndex][rightColumnIndex], // top right
+			this.board[rowIndex][leftColumnIndex], // left
+			this.board[rowIndex][rightColumnIndex], // right
+			this.board[bottomRowIndex][leftColumnIndex], // bottom left
+			this.board[bottomRowIndex][columnIndex], // bottom middle
+			this.board[bottomRowIndex][rightColumnIndex] // bottom right
+		];
+		return neighbors.filter(cell => cell.isAlive()).length;
 	}
 
 	/**
@@ -136,14 +193,12 @@ class Board {
 	 * @return New board.
 	 */
 	#makeBoard(span) {
-		let board = new Array(span);
-		for (let column = 0; column < board.length; column++) {
-			board[column] = new Array(span);
-			for (let row = 0; row < board.length; row++) {
-				board[column][row] = new Cell(new Point(row, column));
-			}
-		}
-
+		// Create a 2D of unique instances (Array.prototype.fill() reuses instances)
+		let board = Array.from(
+			{length: span}, (row, y) => Array.from(
+				{length: span}, (cell, x) => new Cell(new Point(x, y))
+			)
+		);
 		return board;
 	}
 }
