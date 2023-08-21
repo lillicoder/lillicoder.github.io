@@ -84,12 +84,12 @@ class GameOfLife {
 		for (const cell of this.board) {
 			let nextCell = nextBoard.cell(cell.point); // Mutate clone only
 			let count = this.board.countAliveNeighbors(cell); // Count from non-mutated original only
-			if (cell.isAlive() && (count < 2 || count > 3)) {
-				// Alive cells with too few or too many living neighbors should die
-				nextCell.die();
-			} else if (count == 3) {
-				// Dead cells with exactly 3 living neighbors should become alive
+		
+			let shouldLive = cell.isAlive() ? (count === 2 || count === 3) : count === 3;
+			if (shouldLive) {
 				nextCell.live();
+			} else {
+				nextCell.die();
 			}
 		}
 

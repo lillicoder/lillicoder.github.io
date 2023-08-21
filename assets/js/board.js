@@ -107,7 +107,7 @@ class Board {
 	 * @param board Board to copy instead of creating a new one.
 	 * @param canvas HTML5 canvas the game will play on.
 	 */
-	constructor(board = null, span = 50) {
+	constructor(board = null, span = 60) {
 		this.board = board ?? this.#makeBoard(span);
 	}
 
@@ -188,15 +188,14 @@ class Board {
 
 	/**
 	 * Constructs a game board as a 2-dimentional array whose dimenions
-	 * are the given size.
+	 * are the given size. Some cells will be set to alive at random.
 	 * @param span Dimension size.
 	 * @return New board.
 	 */
 	#makeBoard(span) {
-		// Create a 2D of unique instances (Array.prototype.fill() reuses instances)
 		let board = Array.from(
 			{length: span}, (row, y) => Array.from(
-				{length: span}, (cell, x) => new Cell(new Point(x, y))
+				{length: span}, (cell, x) => new Cell(new Point(x, y), Math.random() < 0.3)
 			)
 		);
 		return board;
