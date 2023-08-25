@@ -117,7 +117,7 @@ class Board {
 	 * @return Cell at the given point.
 	 */
 	cell(point) {
-		return this.board[point.x][point.y]; 
+		return this.board[point.y][point.x]; 
 	}
 
 	/**
