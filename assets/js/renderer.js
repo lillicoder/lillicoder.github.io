@@ -60,13 +60,8 @@ class Renderer {
      * @param board Board to render.
      */
     #renderBoard(context, board) {
-        // TODO Introduce an iterator to the board class to avoid this
-        let length = board.length();
-        for(let row = 0; row < length; row++) {
-            for (let column = 0; column < length; column++) {
-                let cell = board.cell(new Point(row, column));
-                this.#renderCell(context, cell);
-            }
+        for (const cell of board) {
+            this.#renderCell(context, cell);
         }
     }
 
@@ -79,8 +74,8 @@ class Renderer {
         // The strokes are split evenly between all sizes of a cell, so split the stroke width
         let normalizedStrokeWidth = Math.floor(this.config.strokeWidth / 2);
         let strokeWidth = Math.max(normalizedStrokeWidth, 1); // Always have at least 1 for the stroke width
-        let x = (this.config.cellLength * cell.point.x) + strokeWidth;
-        let y = (this.config.cellLength * cell.point.y) + strokeWidth;
+        let x = (this.config.cellLength * cell.x) + strokeWidth;
+        let y = (this.config.cellLength * cell.y) + strokeWidth;
 
         context.fillStyle = cell.isAlive() ? this.config.aliveCellColor : this.config.deadCellColor;
         context.fillRect(

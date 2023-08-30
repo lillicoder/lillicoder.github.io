@@ -82,7 +82,7 @@ class GameOfLife {
 	update(tick) {
 		let nextBoard = this.board.clone();
 		for (const cell of this.board) {
-			let nextCell = nextBoard.cell(cell.point); // Mutate clone only
+			let nextCell = nextBoard.cell(cell.x, cell.y); // Mutate clone only
 			let count = this.board.countAliveNeighbors(cell); // Count from non-mutated original only
 		
 			let shouldLive = cell.isAlive() ? (count === 2 || count === 3) : count === 3;

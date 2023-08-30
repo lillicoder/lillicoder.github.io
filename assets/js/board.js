@@ -15,45 +15,22 @@
  */
 
 /**
- * Represents a point with x- and y-coordinate.
- */
-class Point {
-	x;
-	y;
-
-	/**
-	 * Instantiates this point with the given coordinates.
-	 * @param x X-coordinate.
-	 * @param y Y-coordinate.
-	 */
-	constructor(x = 0, y = 0) {
-		this.x = x;
-		this.y = y;
-	}
-
-	/**
-	 * Clones this point.
-	 * @return Clone.
-	 */
-	clone() {
-		return new Point(this.x, this.y);
-	}
-}
-
-/**
  * Represents a cell on the game board.
  */
 class Cell {
-	point;
+	x;
+	y;
 	alive;
 
 	/**
-	 * Instantiates this cell with a given point and liveliness.
-	 * @param point Coordinate for this cell.
+	 * Instantiates this cell with the given coordinates and liveliness.
+	 * @param x X-coordinate for this cell.
+	 * @param y Y-coordinate for this cell.
 	 * @param alive True if the cell is alive, false if not.
 	 */
-	constructor(point = new Point(), alive = false) {
-		this.point = point;
+	constructor(x = 0, y = 0, alive = false) {
+		this.x = x;
+		this.y = y;
 		this.alive = alive;
 	}
 
@@ -62,7 +39,7 @@ class Cell {
 	 * @return Clone.
 	 */
 	clone() {
-		return new Cell(this.point.clone(), this.alive)
+		return new Cell(this.x, this.y, this.alive)
 	}
 
 	/**
@@ -112,12 +89,13 @@ class Board {
 	}
 
 	/**
-	 * Gets the cell for this board at the given point.
-	 * @param point Point of the cell to get;
-	 * @return Cell at the given point.
+	 * Gets the cell for this board at the given coordinates.
+	 * @param x X-coordinate of the cell to get.
+	 * @param y Y-coordinate of the cell to get.
+	 * @return Cell at the given coordinates.
 	 */
-	cell(point) {
-		return this.board[point.y][point.x]; 
+	cell(x, y) {
+		return this.board[y][x]; 
 	}
 
 	/**
@@ -136,7 +114,7 @@ class Board {
 		let span = this.length();
 		let board = Array.from(
 			{length: span}, (row, y) => Array.from(
-				{length: span}, (cell, x) => this.cell(new Point(x, y)).clone()
+				{length: span}, (cell, x) => this.cell(x, y).clone()
 			)
 		);
 		return new Board(board);
@@ -148,8 +126,8 @@ class Board {
 	 * @return Count of living neighbors.
 	 */
 	countAliveNeighbors(cell) {
-		let columnIndex = cell.point.x;
-		let rowIndex = cell.point.y;
+		let columnIndex = cell.x;
+		let rowIndex = cell.y;
 		let span = this.length();
 
 		// Populate cell neighbors, edge cells wrap to other side
@@ -174,14 +152,14 @@ class Board {
 		}
 
 		let neighbors = [
-			this.board[topRowIndex][leftColumnIndex], // top left
-			this.board[topRowIndex][columnIndex], // top middle
-			this.board[topRowIndex][rightColumnIndex], // top right
-			this.board[rowIndex][leftColumnIndex], // left
-			this.board[rowIndex][rightColumnIndex], // right
-			this.board[bottomRowIndex][leftColumnIndex], // bottom left
-			this.board[bottomRowIndex][columnIndex], // bottom middle
-			this.board[bottomRowIndex][rightColumnIndex] // bottom right
+			this.cell(leftColumnIndex, topRowIndex), // top left
+			this.cell(columnIndex, topRowIndex), // top middle
+			this.cell(rightColumnIndex, topRowIndex), // top right
+			this.cell(leftColumnIndex, rowIndex), // left
+			this.cell(rightColumnIndex, rowIndex), // right
+			this.cell(leftColumnIndex, bottomRowIndex), // bottom left
+			this.cell(columnIndex, bottomRowIndex), // bottom middle
+			this.cell(rightColumnIndex, bottomRowIndex) // bottom right
 		];
 		return neighbors.filter(cell => cell.isAlive()).length;
 	}
@@ -195,7 +173,7 @@ class Board {
 	#makeBoard(span) {
 		let board = Array.from(
 			{length: span}, (row, y) => Array.from(
-				{length: span}, (cell, x) => new Cell(new Point(x, y), Math.random() < 0.3)
+				{length: span}, (cell, x) => new Cell(x, y, Math.random() < 0.3)
 			)
 		);
 		return board;
