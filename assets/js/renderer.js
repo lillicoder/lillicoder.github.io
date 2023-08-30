@@ -18,7 +18,6 @@
  * Renders a game board on an HTML5 canvas.
  */
 class Renderer {
-    // TODO Find a way to make these immutable to avoid side effects
     config = {
         strokeWidth: 2,
         strokeColor: "#dddddd",
